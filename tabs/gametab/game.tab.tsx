@@ -1,9 +1,9 @@
-import React, { useState } from 'react'
-import {View, Text, ImageBackground,Image, TouchableOpacity} from 'react-native'
+import React, { useState,useEffect } from 'react'
+import {View, Text, ImageBackground,Image, TouchableOpacity, Alert} from 'react-native'
 import gameTabStyle from './game.styles'
 import { Right } from 'native-base'
 import Option from '../../components/option/option.component'
-import { Ionicons} from '@expo/vector-icons'; 
+import { Ionicons,Feather} from '@expo/vector-icons'; 
 
 interface ImageType{
     uri:string
@@ -66,12 +66,18 @@ const GameTab:React.FC=()=>{
     const [index, setIndex]=useState<number>(0)
     const [score,setScore]=useState<number>(0)
     const [optionStatus, setOptionStatus]=useState<boolean[]>([false,false,false,false])
+    const [fiftyfiftyused, setFiftyFiftyUsed]=useState<boolean>(false)
+    const [showAnswerUsed, setShowAnswerUsed]=useState<boolean>(false)
+    const [selectedAnswer,setSelectedAnswer]=useState<string>('')
+    const [color, setColor]=useState<string>('white')
     
     const{question,options,answer}=gameQuestions[index]
     const correctAnswerIndex = options.findIndex((option)=>option===answer)
-
-
+    const correctAnswer = options[correctAnswerIndex]
+    
     const triggerFiftyFifty=()=>{
+        // const fiftyFiftyUsed=optionStatus.includes(true)
+        setFiftyFiftyUsed(true)
         let ramdonIndex:number|null=null
         do{
             ramdonIndex=Math.floor(Math.random()*Math.floor(4))
@@ -80,17 +86,34 @@ const GameTab:React.FC=()=>{
             (value:boolean,index:number)=>index===ramdonIndex||index===correctAnswerIndex?false:true
         )
         setOptionStatus([...newOptionsStatus])
-
     }
-
+    const triggerShowAnswer=()=>{
+        setShowAnswerUsed(true)
+        setSelectedAnswer(correctAnswer)
+        setColor('green')
+    }
+    const handleOptionButton=(value:string)=>{
+        setSelectedAnswer(value)
+        setColor('gray')
+    }
+    const handleCheck=()=>{
+        setOptionStatus(optionStatus.map((bool:boolean,index:number)=>true))
+        setScore(selectedAnswer===correctAnswer?score+1:score)
+        setColor(selectedAnswer===correctAnswer?'green':'red')
+        setTimeout(()=>{
+            setIndex(index+1)
+            setOptionStatus(optionStatus.map((bool:boolean,index:number)=>false))
+            setSelectedAnswer('')
+        },1000)
+    }
     return(
         <ImageBackground
         source={backgroundImage}
         style={{...gameTabStyle.gameTabContainer}}
         >
             <View style={{...gameTabStyle.scoreBoard}}>
-                <Text style={{fontSize:40,color:'white'}}>Score:{score}</Text>
-                <Right><Text style={{fontSize:40,color:'white'}}>{index+1}/{gameQuestions.length}</Text></Right>
+                <Text style={{fontSize:30,color:'white'}}>Score:{score}</Text>
+                <Text style={{fontSize:30,color:'white'}}>{index+1}/{gameQuestions.length}</Text>
             </View>
             <View style={{...gameTabStyle.scoreQuestion}}>
                 <ImageBackground
@@ -102,7 +125,9 @@ const GameTab:React.FC=()=>{
             </View>
             <View style={{...gameTabStyle.scoreOptions}}>
                 {options.map((option,index)=>
-                    <Option width='40%' height='40%' text={option} key={index} disabled={optionStatus[index]}/>
+                    <Option width='40%' height='40%' text={option} key={index} 
+                    disabled={optionStatus[index]} handlePress={handleOptionButton}bgColor={selectedAnswer===option?color:'white'}
+                    />
                 )}
                 {/* <Option width='40%' height='40%' text='heloo' bgColor='red'/>
                 <Option width='40%' height='40%' text='heloo' bgColor='red'/>
@@ -114,14 +139,28 @@ const GameTab:React.FC=()=>{
             <View style={{...gameTabStyle.scoreLife}}>
                 <TouchableOpacity
                     onPress={triggerFiftyFifty}
+                    disabled={fiftyfiftyused}
                 >
-                    <Ionicons name="md-heart-half" size={50} color="red" />
+                    <Ionicons name="md-heart-half" size={50} color={fiftyfiftyused?"black":"red"} />
                 </TouchableOpacity>
-                <TouchableOpacity>
-                    <Ionicons name="ios-eye" size={50} color="red" />  
+
+                <TouchableOpacity
+                    onPress={triggerShowAnswer}
+                    disabled={showAnswerUsed}
+                >
+                    <Ionicons name="ios-eye" size={50} color={showAnswerUsed?"black":"red"} />  
                 </TouchableOpacity>          
             </View>
-            <View style={{...gameTabStyle.quit}}></View>
+            <View style={{...gameTabStyle.quit}}>
+                <TouchableOpacity>
+                    <Text style={{fontSize:40,color:'white'}}>QUIT</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    onPress={handleCheck}
+                >
+                    <Text style={{fontSize:40,color:'white'}}>{selectedAnswer?"CHECK":"PASS"}</Text>
+                </TouchableOpacity>
+            </View>
         </ImageBackground>
     )
 }

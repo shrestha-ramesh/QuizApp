@@ -10,8 +10,8 @@ const gameTabStyle=StyleSheet.create({
     scoreBoard:{
         width:'90%',
         height:'10%',
-        justifyContent:'center',
-        flexDirection:'row'
+        justifyContent:'space-between',
+        flexDirection:'row',
     },
     scoreQuestion:{
         width:'90%',
@@ -25,17 +25,25 @@ const gameTabStyle=StyleSheet.create({
         justifyContent:'space-evenly'
     },
     scoreLife:{
-        width:'90%',
+        width:'75%',
         height:'10%',
         flexDirection:"row",
         justifyContent:"space-evenly",
         alignItems:"center",
-        backgroundColor:'lightgrey'
+        backgroundColor:'lightgrey',
+        borderRadius:30
     },
     quit:{
-        width:'90%',
+        // width:'50%',
         flex:1,
-        backgroundColor:'pink' 
+        width:'80%',
+        flexDirection:'row',
+        justifyContent:'space-evenly',
+        // justifyContent:'center',
+        alignItems:'center',
+        // padding:10,
+        // borderRadius:20,
+        // margin:20
     }
 })
 export default gameTabStyle

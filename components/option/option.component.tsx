@@ -6,10 +6,11 @@ interface OptionType{
     width:string|number,
     height:string|number,
     bgColor?:string,
-    text?:string,
-    disabled?:boolean
+    text:string,
+    disabled?:boolean,
+    handlePress:(text:string)=>void
 }
-const Option:React.FC<OptionType>=({width,height,bgColor='white',text,disabled=false})=>{
+const Option:React.FC<OptionType>=({width,height,bgColor='white',text,disabled=false,handlePress})=>{
     return(
         <TouchableOpacity 
             style={{width:width,
@@ -18,6 +19,7 @@ const Option:React.FC<OptionType>=({width,height,bgColor='white',text,disabled=f
             }}
             activeOpacity={0.8}
             disabled={disabled}
+            onPress={()=>handlePress(text)}
         >
             <Card style={{
                 width:'100%',height:'100%',justifyContent:'center',
