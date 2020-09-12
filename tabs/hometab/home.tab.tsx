@@ -5,7 +5,11 @@ import Header from '../../components/header/header.component'
 import NewGameButton from '../../components/new-game-button/newGameButton.component'
 import LeaderBoard from '../../components/leaderboard/leaderboard.component'
 
-const HomeTab:React.FC=()=>{
+interface HomeTabType{
+    navigation:any
+}
+
+const HomeTab:React.FC<HomeTabType>=({navigation})=>{
     return(
         <View style={homeStyle.homeTab}>
             <ImageBackground
@@ -13,7 +17,7 @@ const HomeTab:React.FC=()=>{
                 source={{uri:`https://i.pinimg.com/originals/1d/7e/4d/1d7e4dfd1194a19152cfc55a77d64982.jpg?fbclid=IwAR3lcrOoLkB2g4jsYSYeTyGuRaLa2bpr0_zDB3Etc-aJfhAyCmlE_4J3ltU`}}
             >
             <View style={{...homeStyle.centerFlex,...homeStyle.newGameContainer}}>
-                <NewGameButton/>
+                <NewGameButton navigation={navigation}/>
             </View>
             <View style={{...homeStyle.centerFlex,...homeStyle.leaderBoardContainer}}>
                 <LeaderBoard/>

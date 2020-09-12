@@ -1,12 +1,17 @@
-import React, { useState,useEffect } from 'react'
-import {View, Text, ImageBackground,Image, TouchableOpacity, Alert} from 'react-native'
+import React, { useState,useEffect} from 'react'
+import {View, Text, ImageBackground,Image, TouchableOpacity, Alert,Modal,Button,TextInput} from 'react-native'
 import gameTabStyle from './game.styles'
-import { Right } from 'native-base'
+import { Right} from 'native-base'
 import Option from '../../components/option/option.component'
 import { Ionicons,Feather} from '@expo/vector-icons'; 
+import AsyncStorage from '@react-native-community/async-storage';
+
 
 interface ImageType{
     uri:string
+}
+interface GameTabType{
+    navigation:any
 }
 type OptionsType=string[]
 type gameQuestionsType={
@@ -62,7 +67,7 @@ const gameQuestions:gameQuestionsType=[
 ]
 
 const backgroundImage:ImageType={uri:"https://i.pinimg.com/originals/1d/7e/4d/1d7e4dfd1194a19152cfc55a77d64982.jpg?fbclid=IwAR3lcrOoLkB2g4jsYSYeTyGuRaLa2bpr0_zDB3Etc-aJfhAyCmlE_4J3ltU"}
-const GameTab:React.FC=()=>{
+const GameTab:React.FC<GameTabType>=({navigation})=>{
     const [index, setIndex]=useState<number>(0)
     const [score,setScore]=useState<number>(0)
     const [optionStatus, setOptionStatus]=useState<boolean[]>([false,false,false,false])
@@ -70,6 +75,8 @@ const GameTab:React.FC=()=>{
     const [showAnswerUsed, setShowAnswerUsed]=useState<boolean>(false)
     const [selectedAnswer,setSelectedAnswer]=useState<string>('')
     const [color, setColor]=useState<string>('white')
+    const [showModal, setShowModal]=useState<boolean>(false)
+    const [name, setName]=useState<string>('')
     
     const{question,options,answer}=gameQuestions[index]
     const correctAnswerIndex = options.findIndex((option)=>option===answer)
@@ -97,20 +104,64 @@ const GameTab:React.FC=()=>{
         setColor('gray')
     }
     const handleCheck=()=>{
-        setOptionStatus(optionStatus.map((bool:boolean,index:number)=>true))
-        setScore(selectedAnswer===correctAnswer?score+1:score)
-        setColor(selectedAnswer===correctAnswer?'green':'red')
-        setTimeout(()=>{
-            setIndex(index+1)
-            setOptionStatus(optionStatus.map((bool:boolean,index:number)=>false))
-            setSelectedAnswer('')
-        },1000)
+            setOptionStatus(optionStatus.map((bool:boolean,index:number)=>true))
+            const updateScore =selectedAnswer===correctAnswer?score+1:score
+            setScore(updateScore)
+            setColor(selectedAnswer===correctAnswer?'green':'red')
+            setTimeout(async()=>{
+                if(index+1===gameQuestions.length){
+                    try{
+                        await AsyncStorage.setItem('score',updateScore.toString())
+                    }catch(error){
+                        console.log(error);
+                    }
+                    return navigation.navigate("scoretab")
+                }
+                setIndex(index+1)
+                setOptionStatus(optionStatus.map((bool:boolean,index:number)=>false))
+                setSelectedAnswer('')
+            },1000)
     }
+    // useEffect(()=>{
+    //     setShowModal(true)
+    // },[])
+    // const storeName=async()=>{
+
+    // }
+    // const NameModal=()=>{
+    //     return(
+    //         <Modal
+    //             animationType="slide"
+    //             transparent={true}
+    //             visible={showModal}
+    //             onRequestClose={() => {
+    //                 Alert.alert("Modal has been closed.");
+    //             }}
+    //         >
+    //             <View style={{flex:1, justifyContent:'center',alignItems:'center'}}> 
+    //                 <View style={{width:'90%', height:'60%',backgroundColor:'white',
+    //                     justifyContent:'center',alignItems:'center',borderRadius:40}}>
+    //                     <Text style={{fontSize:30,padding:10}}>Welcome to the Game</Text>
+    //                     <TextInput
+    //                         style={{width:'80%',borderWidth:1,height:'15%',borderRadius:30,padding:10}}
+    //                         placeholder="Enter your name"
+    //                         value={name}
+    //                         onChangeText={(data)=>setName(data)}
+    //                     />
+    //                     <Button title="PLAY" onPress={()=>storeName()}
+    //                     />
+    //                 </View>
+    //             </View>
+    //         </Modal>
+    //     )
+    // }
     return(
         <ImageBackground
         source={backgroundImage}
         style={{...gameTabStyle.gameTabContainer}}
         >
+
+            {/* <NameModal/> */}
             <View style={{...gameTabStyle.scoreBoard}}>
                 <Text style={{fontSize:30,color:'white'}}>Score:{score}</Text>
                 <Text style={{fontSize:30,color:'white'}}>{index+1}/{gameQuestions.length}</Text>
@@ -152,7 +203,23 @@ const GameTab:React.FC=()=>{
                 </TouchableOpacity>          
             </View>
             <View style={{...gameTabStyle.quit}}>
-                <TouchableOpacity>
+                <TouchableOpacity
+                    onPress={()=>{
+                        Alert.alert(
+                            "Are you sure you want to quit?",
+                            "",
+                            [
+                              {
+                                text: "Cancel",
+                                onPress: () => console.log("Cancel Pressed"),
+                                style: "cancel"
+                              },
+                              { text: "OK", onPress: () => navigation.navigate("hometab") }
+                            ],
+                            { cancelable: false }
+                          );
+                    }}
+                >
                     <Text style={{fontSize:40,color:'white'}}>QUIT</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
